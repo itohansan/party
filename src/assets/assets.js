@@ -253,7 +253,7 @@ export const residents = [
     id: 2,
     day: "Tuesday",
     content: "Karaoke & Taco Tuesday",
-    bg: "bg-[url('/images/industry.jpeg')] bg-cover bg-center",
+    bg: "bg-[url('/images/karaoke.jpg')] bg-cover bg-center",
   },
   {
     id: 3,
