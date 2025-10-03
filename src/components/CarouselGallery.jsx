@@ -1,10 +1,31 @@
 import React, { useState, useEffect } from "react";
+import { useSpring, animated } from "@react-spring/web";
+import { useDrag } from "@use-gesture/react";
 
 const CarouselGallery = ({ data, activeSlide = 0 }) => {
   const [current, setCurrent] = useState(activeSlide);
+  const [styles, api] = useSpring(() => ({ rotateY: 0 }));
 
   const next = () => current < data.length - 1 && setCurrent((c) => c + 1);
   const prev = () => current > 0 && setCurrent((c) => c - 1);
+
+  const bind = useDrag(
+    ({ down, movement: [mx], velocity: [vx], direction: [dx], cancel }) => {
+      if (!down && Math.abs(vx) > 0.2) {
+        // Flick left or right
+        if (dx > 0) {
+          // swipe right → previous
+          setCurrent((prev) => (prev === 0 ? data.length - 1 : prev - 1));
+        } else {
+          // swipe left → next
+          setCurrent((prev) => (prev === data.length - 1 ? 0 : prev + 1));
+        }
+        api.start({ x: 0, immediate: false });
+      } else {
+        api.start({ x: down ? mx : 0, immediate: down });
+      }
+    }
+  );
 
   // bp
 
@@ -75,7 +96,8 @@ const CarouselGallery = ({ data, activeSlide = 0 }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen  ">
       {/* Carousel container */}
-      <div
+      <animated.div
+        {...bind()}
         className="relative max-w-full w-[458px] h-[680px] mx-auto flex justify-center"
         style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
       >
@@ -102,7 +124,7 @@ const CarouselGallery = ({ data, activeSlide = 0 }) => {
             ></div>
           </React.Fragment>
         ))}
-      </div>
+      </animated.div>
 
       {/* indicator buttons */}
       <div className="flex items-center justify-center gap-2 -mt-6 z-20">

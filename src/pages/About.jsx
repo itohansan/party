@@ -3,7 +3,6 @@ import CarouselGallery from "../components/CarouselGallery";
 import { Link } from "react-router-dom";
 import { gallery } from "../assets/assets";
 import Footer from "../components/Footer";
-import SubscribeSection from "../components/SubscribeSection";
 
 function About() {
   return (

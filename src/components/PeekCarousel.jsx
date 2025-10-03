@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useSpring, animated } from "@react-spring/web";
+import { useDrag } from "@use-gesture/react";
 
 const PeekCarousel2 = ({
   slides = [],
@@ -14,6 +16,22 @@ const PeekCarousel2 = ({
   const [slideWidth, setSlideWidth] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef(null);
+  const [props, api] = useSpring(() => ({ x: 0 }));
+
+  const bind = useDrag(
+    ({ down, movement: [mx], velocity: [vx], direction: [dx] }) => {
+      if (!down && Math.abs(vx) > 0.2) {
+        if (dx > 0) {
+          setActiveIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+        } else {
+          setActiveIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+        }
+        api.start({ x: 0, immediate: false });
+      } else {
+        api.start({ x: down ? mx : 0, immediate: down });
+      }
+    }
+  );
 
   useEffect(() => {
     function updateSizes() {
@@ -72,7 +90,8 @@ const PeekCarousel2 = ({
     >
       {/* wrapper */}
       <div className="overflow-hidden ">
-        <div
+        <animated.div
+          {...bind()}
           className="flex transition-transform duration-500 ease-in-out pb-3 "
           style={{ transform: `translateX(${translateX}px)` }}
         >
@@ -126,7 +145,7 @@ const PeekCarousel2 = ({
               </div>
             );
           })}
-        </div>
+        </animated.div>
       </div>
 
       {/* Indicators */}

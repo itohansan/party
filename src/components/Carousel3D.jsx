@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from "react";
+import { useSpring, animated } from "@react-spring/web";
+import { useDrag } from "@use-gesture/react";
 
 const Carousel3D = ({ slides = [], width = 200, height = 200, gap = 20 }) => {
   const cellCount = slides.length;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [styles, api] = useSpring(() => ({ rotateY: 0 }));
 
-  // Radius (tz) — computed using formula & chosen width
   const tz = useMemo(() => {
     return Math.round(width / 2 / Math.tan(Math.PI / cellCount));
   }, [width, cellCount]);
@@ -22,6 +24,28 @@ const Carousel3D = ({ slides = [], width = 200, height = 200, gap = 20 }) => {
   // Scene size should fit your cells comfortably
   const sceneSize = Math.max(width, height) * 2;
 
+  const bind = useDrag(
+    ({ down, movement: [mx], velocity: [vx], direction: [dx], cancel }) => {
+      if (!down && Math.abs(vx) > 0.2) {
+        // Flick left or right
+        if (dx > 0) {
+          // swipe right → previous
+          setCurrentIndex((prev) =>
+            prev === 0 ? slides.length - 1 : prev - 1
+          );
+        } else {
+          // swipe left → next
+          setCurrentIndex((prev) =>
+            prev === slides.length - 1 ? 0 : prev + 1
+          );
+        }
+        api.start({ x: 0, immediate: false });
+      } else {
+        api.start({ x: down ? mx : 0, immediate: down });
+      }
+    }
+  );
+
   return (
     <div className="flex flex-col items-center justify-center w-full h-2/3 overflow-hidden ">
       {/* Scene */}
@@ -29,7 +53,8 @@ const Carousel3D = ({ slides = [], width = 200, height = 200, gap = 20 }) => {
         className="relative perspective-[1500px] overflow-hidden "
         style={{ width: sceneSize, height: sceneSize }}
       >
-        <div
+        <animated.div
+          {...bind()}
           className="absolute inset-0 transition-transform duration-700 preserve-3d  overflow-ellipsis "
           style={{
             transform: `translateZ(-${tz}px) rotateY(${rotateY}deg)`,
@@ -59,11 +84,11 @@ const Carousel3D = ({ slides = [], width = 200, height = 200, gap = 20 }) => {
               </div>
             );
           })}
-        </div>
+        </animated.div>
       </div>
 
       {/* Indicators */}
-      <div className="flex gap-4 relative -top-20">
+      <div className="flex gap-4 relative -top-10">
         {slides.map((_, i) => (
           <button
             key={i}

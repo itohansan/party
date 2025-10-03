@@ -1,7 +1,11 @@
 import React, { useRef, useState } from "react";
 
-import REMA from "../assets/REMA.mp4";
-import REMA4k from "../assets/REMA4k.mp4";
+// import REMA from "/videos/REMA.mp4";
+// import REMA4k from "/videos/REMA4k.mp4";
+
+const REMA = "/videos/REMA.mp4"; // smaller version for mobile
+const REMA4k = "/videos/REMA4k.mp4";
+const FALLBACK_POSTER = "/videos/REMA-poster.jpg";
 
 function Concert() {
   const videoRef = useRef(null);
@@ -24,9 +28,11 @@ function Concert() {
         muted={isMuted}
         loop
         playsInline
+        preload="auto"
+        poster={FALLBACK_POSTER}
       >
-        <source src={REMA4k} type="video/mp4" media="(min-width: 1024px)" />
         <source src={REMA} type="video/mp4" media="(max-width: 1023px)" />
+        <source src={REMA4k} type="video/mp4" media="(min-width: 1024px)" />
         Your browser does not support the video tag.
       </video>
 
